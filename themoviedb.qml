@@ -47,6 +47,7 @@ Rectangle {
                 anchors.margins: 3
                 font.pixelSize: 16
 
+                onAccepted: searchFunc()
             }
         }
 
@@ -61,7 +62,7 @@ Rectangle {
     }
 
     ListView {
-        id: view
+        id: mainListView
 
         anchors.margins: 10
 
@@ -70,41 +71,31 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        model: films
+        //model: films
         spacing: 10
 
-        delegate: Rectangle {
-            width: view.width
-            height: 100
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: 'white'
-            border {
-                color: 'lightgray'
-                width: 2
-            }
-            radius: 10
+        model: ListModel { id: finalModel }
 
-            Row {
-                anchors.margins: 10
-                anchors.fill: parent
-                spacing: 10
+        add: Transition {
+            NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 400 }
+            NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 400 }
+        }
 
-                Image {
-                    id: image
+        remove: Transition {
+            NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 400 }
+            NumberAnimation { property: "scale"; from: 1; to: 0; duration: 400 }
+        }
 
-                    height: parent.height
-                    fillMode: Image.PreserveAspectFit
-                    source: "http://image.tmdb.org/t/p/w92%1".arg(modelData['poster_path'])
-                }
+        delegate: FilmDelegate{}
 
-                Text {
-                    width: parent.width - image.width - parent.spacing
-                    anchors.verticalCenter: parent.verticalCenter
-                    elide: Text.ElideRight
-                    renderType: Text.NativeRendering
-                    text: "%1".arg(modelData['original_title'])
-                }
-            }
+        function add(obj) {
+            //model.insert(0, obj)
+            model.append(obj)
+        }
+
+        function clear() {
+            interactive: true
+            model.clear()
         }
     }
 
@@ -113,6 +104,7 @@ Rectangle {
 
     function searchFunc()
     {
+        mainListView.clear();
         console.log("search movies -- " + search_txt.text);
 
         var strget = "https://api.themoviedb.org/3/search/movie?api_key=" + api_key +
@@ -130,7 +122,7 @@ Rectangle {
             {
                 if (req.status && req.status === 200)
                 {
-                    console.log("XMLHttpRequest.DONE txt --   " + req.responseText );
+                    //console.log("XMLHttpRequest.DONE txt --   " + req.responseText );
                     var objectArray = JSON.parse(req.responseText);
 
                     if (objectArray.errors !== undefined)
@@ -139,13 +131,20 @@ Rectangle {
                     }
                     else
                     {
-                        main.films = objectArray.results
+                        //main.films = objectArray.results
+
                         for (var indx in objectArray.results)
                         {
                             var jsonObject = objectArray.results[indx];
+
+                            /*mainListView.add({ "poster_path": jsonObject["poster_path"],
+                                               "original_title": jsonObject["original_title"]
+                                             });*/
+
+                            mainListView.add(jsonObject);
                             for(var key in jsonObject)
                             {
-                                console.log(key," = ", jsonObject[key]);
+                                //console.log(key," = ", jsonObject[key]);
                             }
                         }
                     }
