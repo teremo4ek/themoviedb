@@ -139,10 +139,10 @@ Rectangle {
                     }
                     else
                     {
+                        main.films = objectArray.results
                         for (var indx in objectArray.results)
                         {
                             var jsonObject = objectArray.results[indx];
-                            main.films = jsonObject;
                             for(var key in jsonObject)
                             {
                                 console.log(key," = ", jsonObject[key]);
